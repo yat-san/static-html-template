@@ -4,20 +4,27 @@ const fs = require("fs");
 const webpack = require("webpack");
 const HtmlPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const { CleanWebpackPlugin } = require("clean-webpack-plugin");
+const {CleanWebpackPlugin} = require("clean-webpack-plugin");
+const Imagemin = require("imagemin-webpack");
 const pagesPath = path.resolve(__dirname, "src/pages");
 
 function getPages() {
   return fs.readdirSync(pagesPath);
 }
 
-module.exports = function(env) {
+module.exports = function (env) {
   return {
     mode: env.production ? "production" : "development",
-    entry: [
-      path.resolve(__dirname, "src/js/main.js"),
-      path.resolve(__dirname, "src/styles/main.scss")
-    ],
+    entry: {
+      main: [
+        path.resolve(__dirname, "src/js/main.js"),
+        path.resolve(__dirname, "src/styles/main.scss")
+      ],
+      libs: [
+        /* Add here IDs of needed modules and they will concatenate into files libs.js and libs.css */
+        require.resolve("jquery")
+      ]
+    },
     output: {
       path: path.resolve(__dirname, "dist/"),
       publicPath: env.production ? "./" : "/",
@@ -60,7 +67,7 @@ module.exports = function(env) {
                     presets: [
                       [
                         "@babel/preset-env",
-                        { modules: false, useBuiltIns: "usage", corejs: 3 }
+                        {modules: false, useBuiltIns: "usage", corejs: 3}
                       ]
                     ]
                   }
@@ -74,12 +81,13 @@ module.exports = function(env) {
                 {
                   loader: MiniCssExtractPlugin.loader,
                   options: {
+                    publicPath: '../',
                     hmr: !env.production
                   }
                 },
                 {
                   loader: require.resolve("css-loader"),
-                  options: { importLoaders: 2 }
+                  options: {importLoaders: 2}
                 },
                 {
                   loader: require.resolve("postcss-loader"),
@@ -107,31 +115,60 @@ module.exports = function(env) {
               loader: "file-loader",
               exclude: [/\.(js|mjs|jsx|ts|tsx)$/, /\.html$/, /\.json$/],
               options: {
-                outputPath: "assets",
-                name: "[name].[ext]"
+                outputPath: "images",
+                name: "[path][name].[ext]",
+                context: "images"
               }
             }
           ]
         }
       ]
     },
-    plugins: [new CleanWebpackPlugin()].concat(
-      getPages()
-        .map(page => {
-          return new HtmlPlugin({
-            inject: true,
-            template: path.join(pagesPath, page),
-            filename: page.replace("njk", "html")
-          });
-        })
-        .concat([
-          new MiniCssExtractPlugin({
-            filename: "styles/styles.css"
+    plugins: [
+      new CleanWebpackPlugin(),
+      new Imagemin({
+        bail: false, // Ignore errors on corrupted images
+        cache: false,
+        imageminOptions: {
+          // Before using imagemin plugins make sure you have added them in `package.json` (`devDependencies`) and installed them
+
+          // Lossless optimization with custom option
+          // Feel free to experiment with options for better result for you
+          plugins: [
+            ["gifsicle", {interlaced: true}],
+            ["jpegtran", {progressive: true}],
+            ["optipng", {optimizationLevel: 5}],
+            [
+              "svgo",
+              {
+                options: require("./svgo.config"),
+                plugins: [
+                  {
+                    removeViewBox: false
+                  }
+                ]
+              }
+            ]
+          ]
+        }
+      })]
+      .concat(
+        getPages()
+          .map(page => {
+            return new HtmlPlugin({
+              inject: true,
+              template: path.join(pagesPath, page),
+              filename: page.replace("njk", "html")
+            });
           })
-          // env.development && new webpack.HotModuleReplacementPlugin()
-        ])
-        .filter(Boolean)
-    ),
+          .concat([
+            new MiniCssExtractPlugin({
+              filename: "styles/styles.css"
+            })
+            // env.development && new webpack.HotModuleReplacementPlugin()
+          ])
+          .filter(Boolean),
+      ),
     node: {
       module: "empty",
       dgram: "empty",
