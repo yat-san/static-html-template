@@ -112,6 +112,17 @@ module.exports = function (env) {
               ]
             },
             {
+              /* Fonts */
+              test: [/\.(ttf|woff2?|eot)$/],
+              loader: "file-loader",
+              options: {
+                outputPath: "fonts",
+                name: "[path][name].[ext]",
+                context: "fonts"
+              }
+            },
+            {
+              /* Images */
               loader: "file-loader",
               exclude: [/\.(js|mjs|jsx|ts|tsx)$/, /\.html$/, /\.json$/],
               options: {
