@@ -3,17 +3,33 @@
   "version": "0.0.0",
   "private": true,
   "devDependencies": {
+    "@babel/core": "^7.9.0",
+    "@babel/preset-env": "^7.9.5",
+    "autoprefixer": "^9.7.6",
+    "babel-loader": "^8.1.0",
+    "clean-webpack-plugin": "^3.0.0",
+    "css-loader": "^3.5.2",
+    "file-loader": "^6.0.0",
+    "html-loader": "^1.1.0",
+    "html-webpack-plugin": "^4.2.0",
+    "mini-css-extract-plugin": "^0.9.0",
     "nunjucks": "^3.2.0",
-    "parcel-bundler": "^1.12.3",
-    "parcel-plugin-imagemin": "^3.0.0",
-    "parcel-plugin-nunjucks": "^2.1.1",
-    "sass": "^1.23.0-module.beta.1"
+    "postcss-loader": "^3.0.0",
+    "postcss-normalize": "^9.0.0",
+    "resolve-url-loader": "^3.1.0",
+    "sass": "^1.23.0",
+    "sass-loader": "^8.0.0",
+    "shiny-nunjucks-loader": "^0.1.1",
+    "style-loader": "^1.0.0",
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.9",
+    "webpack-dev-server": "^3.8.2"
   },
   "scripts": {
-    "start": "parcel src/pages/index.njk --open",
-    "build": "parcel build src/pages/index.njk"
+    "start": "webpack-dev-server --env.development",
+    "build": "webpack --env.production"
   },
   "dependencies": {
-    "reset-css": "^4.0.1"
+    "core-js": "^3.6.5"
   }
 }
